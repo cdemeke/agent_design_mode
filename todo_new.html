@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow - Modern Todo Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        @font-face {
+            font-family: 'Aeonik Mono';
+            src: local('Courier New'), local('Courier'), local('monospace');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+        * {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+        .font-mono {
+            font-family: 'Aeonik Mono', 'Courier New', monospace !important;
+        }
+    </style>
+</head>
+<body class="bg-[#f5f3ed] min-h-screen p-5 md:p-10 overflow-x-hidden">
+
+    <!-- Decorative Elements -->
+    <div class="fixed top-20 left-10 w-16 h-12 border-2 border-[#383838] rounded-[50px] hidden md:block" style="z-index: 0;">
+        <div class="absolute w-8 h-8 border-2 border-[#383838] rounded-full -top-4 left-1"></div>
+    </div>
+    <div class="fixed top-16 right-24 w-6 h-6 border-2 border-[#383838] transform rotate-45 hidden md:block" style="z-index: 0;"></div>
+    <div class="fixed bottom-24 right-16 w-11 h-14 bg-gradient-to-br from-[#4db5a5] to-[#3a9587] rounded-lg border-2 border-[#383838] hidden md:block" style="z-index: 0; transform: perspective(200px) rotateY(-15deg);"></div>
+    <div class="fixed bottom-28 left-20 w-4 h-4 border-2 border-[#383838] transform rotate-45 hidden md:block" style="z-index: 0;"></div>
+
+    <!-- Main Container -->
+    <div class="max-w-5xl mx-auto relative" style="z-index: 1;">
+
+        <!-- Header -->
+        <div class="text-center mb-10">
+            <h1 class="font-mono text-4xl md:text-5xl font-normal tracking-[0.96px] text-[#383838] uppercase mb-3">TaskFlow</h1>
+            <p class="font-mono text-sm font-normal tracking-[0.28px] text-[#555] uppercase">Organize Your Day, Amplify Your Impact</p>
+        </div>
+
+        <!-- Main Grid Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+
+            <!-- Left Column: Input & Stats -->
+            <div class="lg:col-span-2 space-y-6">
+
+                <!-- Add Task Card -->
+                <div class="bg-white border-2 border-[#383838] rounded-lg p-6 md:p-8" style="box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.1);">
+                    <h2 class="font-mono text-sm font-semibold tracking-[0.48px] text-[#383838] uppercase mb-4 flex items-center gap-2">
+                        <i data-lucide="plus-circle" class="w-4 h-4" style="stroke-width: 1;"></i>
+                        Add New Task
+                    </h2>
+                    <div class="space-y-3">
+                        <input
+                            type="text"
+                            id="taskInput"
+                            placeholder="What needs to be done?"
+                            class="w-full px-5 py-4 border-2 border-[#383838] rounded focus:outline-none focus:border-[#6fc2ff] text-sm text-[#383838] bg-white"
+                        >
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <select id="prioritySelect" class="flex-1 px-4 py-3 border-2 border-[#383838] rounded text-sm text-[#383838] bg-white focus:outline-none focus:border-[#6fc2ff] font-mono uppercase text-xs font-semibold tracking-[0.48px]">
+                                <option value="low">Low Priority</option>
+                                <option value="medium" selected>Medium Priority</option>
+                                <option value="high">High Priority</option>
+                            </select>
+                            <button
+                                id="addTaskBtn"
+                                class="px-8 py-3 bg-[#6fc2ff] border-2 border-[#383838] rounded hover:bg-[#4a9fd4] transition-colors font-mono text-xs font-semibold tracking-[0.52px] uppercase text-[#383838] flex items-center justify-center gap-2"
+                            >
+                                <i data-lucide="plus" class="w-4 h-4" style="stroke-width: 1;"></i>
+                                Add Task
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Task List Card -->
+                <div class="bg-white border-2 border-[#383838] rounded-lg p-6 md:p-8" style="box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.1);">
+
+                    <!-- Filters -->
+                    <div class="flex flex-wrap gap-3 mb-6 pb-6 border-b-2 border-[#e0e0e0]">
+                        <button class="filter-btn active" data-filter="all">
+                            <span class="font-mono text-xs font-semibold tracking-[0.48px] uppercase">All</span>
+                        </button>
+                        <button class="filter-btn" data-filter="active">
+                            <span class="font-mono text-xs font-semibold tracking-[0.48px] uppercase">Active</span>
+                        </button>
+                        <button class="filter-btn" data-filter="completed">
+                            <span class="font-mono text-xs font-semibold tracking-[0.48px] uppercase">Completed</span>
+                        </button>
+                        <div class="flex-1"></div>
+                        <button class="filter-btn" data-filter="high">
+                            <span class="font-mono text-xs font-semibold tracking-[0.48px] uppercase">High</span>
+                        </button>
+                        <button class="filter-btn" data-filter="medium">
+                            <span class="font-mono text-xs font-semibold tracking-[0.48px] uppercase">Medium</span>
+                        </button>
+                        <button class="filter-btn" data-filter="low">
+                            <span class="font-mono text-xs font-semibold tracking-[0.48px] uppercase">Low</span>
+                        </button>
+                    </div>
+
+                    <!-- Task Items -->
+                    <div id="taskList" class="space-y-0">
+                        <!-- Tasks will be inserted here -->
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="emptyState" class="text-center py-16 hidden">
+                        <div class="text-6xl mb-4">📋</div>
+                        <p class="font-mono text-sm font-normal tracking-[0.28px] uppercase text-[#999]">No tasks found. Add one above!</p>
+                    </div>
+
+                    <!-- Footer Actions -->
+                    <div id="taskFooter" class="flex flex-col sm:flex-row justify-between items-center pt-6 mt-6 border-t-2 border-[#e0e0e0] gap-4 hidden">
+                        <div class="font-mono text-xs font-semibold tracking-[0.48px] uppercase text-[#555]">
+                            <span id="activeCount">0</span> active
+                            <span class="inline-flex items-center justify-center min-w-[24px] h-6 px-2 bg-[#4db5a5] border-2 border-[#383838] rounded-full font-mono text-xs font-bold text-white ml-2" id="completedBadge">0</span>
+                        </div>
+                        <button id="clearCompletedBtn" class="px-6 py-2.5 border-2 border-[#383838] rounded bg-white hover:bg-[#383838] hover:text-white transition-colors font-mono text-xs font-semibold tracking-[0.44px] uppercase text-[#383838]">
+                            Clear Completed
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Column: Stats & Info -->
+            <div class="space-y-6">
+
+                <!-- Quick Stats -->
+                <div class="bg-white border-2 border-[#383838] rounded-lg p-6" style="box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.1);">
+                    <h3 class="font-mono text-sm font-semibold tracking-[0.48px] text-[#383838] uppercase mb-4 flex items-center gap-2">
+                        <i data-lucide="bar-chart-3" class="w-4 h-4" style="stroke-width: 1;"></i>
+                        Statistics
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center py-3 border-b border-[#e0e0e0]">
+                            <span class="font-mono text-xs tracking-[0.44px] uppercase text-[#555]">Total Tasks</span>
+                            <span class="font-mono text-lg font-semibold text-[#383838]" id="totalCount">0</span>
+                        </div>
+                        <div class="flex justify-between items-center py-3 border-b border-[#e0e0e0]">
+                            <span class="font-mono text-xs tracking-[0.44px] uppercase text-[#555]">Active</span>
+                            <span class="font-mono text-lg font-semibold text-[#6fc2ff]" id="statActiveCount">0</span>
+                        </div>
+                        <div class="flex justify-between items-center py-3">
+                            <span class="font-mono text-xs tracking-[0.44px] uppercase text-[#555]">Completed</span>
+                            <span class="font-mono text-lg font-semibold text-[#4db5a5]" id="statCompletedCount">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Priority Breakdown -->
+                <div class="bg-white border-2 border-[#383838] rounded-lg p-6" style="box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.1);">
+                    <h3 class="font-mono text-sm font-semibold tracking-[0.48px] text-[#383838] uppercase mb-4 flex items-center gap-2">
+                        <i data-lucide="flag" class="w-4 h-4" style="stroke-width: 1;"></i>
+                        Priority
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center gap-2">
+                                <div class="w-3 h-3 bg-[#ff6b6b] border border-[#383838] rounded-full"></div>
+                                <span class="font-mono text-xs tracking-[0.44px] uppercase text-[#555]">High</span>
+                            </div>
+                            <span class="font-mono text-sm font-semibold text-[#383838]" id="highCount">0</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center gap-2">
+                                <div class="w-3 h-3 bg-[#ffd93d] border border-[#383838] rounded-full"></div>
+                                <span class="font-mono text-xs tracking-[0.44px] uppercase text-[#555]">Medium</span>
+                            </div>
+                            <span class="font-mono text-sm font-semibold text-[#383838]" id="mediumCount">0</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center gap-2">
+                                <div class="w-3 h-3 bg-[#6fc2ff] border border-[#383838] rounded-full"></div>
+                                <span class="font-mono text-xs tracking-[0.44px] uppercase text-[#555]">Low</span>
+                            </div>
+                            <span class="font-mono text-sm font-semibold text-[#383838]" id="lowCount">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Keyboard Shortcuts -->
+                <div class="bg-white border-2 border-[#383838] rounded-lg p-6" style="box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.1);">
+                    <h3 class="font-mono text-sm font-semibold tracking-[0.48px] text-[#383838] uppercase mb-4 flex items-center gap-2">
+                        <i data-lucide="keyboard" class="w-4 h-4" style="stroke-width: 1;"></i>
+                        Shortcuts
+                    </h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-[#555]">Add task</span>
+                            <kbd class="px-2 py-1 bg-[#f5f3ed] border border-[#383838] rounded font-mono text-[10px]">Enter</kbd>
+                        </div>
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-[#555]">Focus input</span>
+                            <kbd class="px-2 py-1 bg-[#f5f3ed] border border-[#383838] rounded font-mono text-[10px]">/</kbd>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center py-5">
+            <p class="font-mono text-xs font-normal tracking-[0.44px] uppercase text-[#999]">
+                Built with purpose · <span class="text-[#6fc2ff] font-semibold">TaskFlow 2024</span>
+            </p>
+        </div>
+
+    </div>
+
+    <style>
+        .filter-btn {
+            padding: 10px 18px;
+            border: 2px solid #383838;
+            border-radius: 2px;
+            background: #ffffff;
+            color: #383838;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .filter-btn:hover {
+            background-color: #f5f3ed;
+        }
+        .filter-btn.active {
+            background-color: #6fc2ff;
+            color: #383838;
+        }
+        .task-checkbox {
+            width: 22px;
+            height: 22px;
+            border: 2px solid #383838;
+            border-radius: 2px;
+            cursor: pointer;
+            flex-shrink: 0;
+            appearance: none;
+            position: relative;
+            background: #ffffff;
+        }
+        .task-checkbox:checked {
+            background-color: #4db5a5;
+            border-color: #383838;
+        }
+        .task-checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .priority-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px 10px;
+            border: 1px solid #383838;
+            border-radius: 2px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        .priority-high { background: #ff6b6b; color: white; }
+        .priority-medium { background: #ffd93d; color: #383838; }
+        .priority-low { background: #6fc2ff; color: white; }
+    </style>
+
+    <script>
+        lucide.createIcons({ strokeWidth: 1 });
+
+        class TaskFlowApp {
+            constructor() {
+                this.tasks = this.loadTasks();
+                this.currentFilter = 'all';
+                this.init();
+            }
+
+            init() {
+                this.cacheDom();
+                this.bindEvents();
+                this.render();
+            }
+
+            cacheDom() {
+                this.taskInput = document.getElementById('taskInput');
+                this.prioritySelect = document.getElementById('prioritySelect');
+                this.addTaskBtn = document.getElementById('addTaskBtn');
+                this.taskList = document.getElementById('taskList');
+                this.emptyState = document.getElementById('emptyState');
+                this.taskFooter = document.getElementById('taskFooter');
+                this.filterBtns = document.querySelectorAll('.filter-btn');
+                this.clearCompletedBtn = document.getElementById('clearCompletedBtn');
+            }
+
+            bindEvents() {
+                this.addTaskBtn.addEventListener('click', () => this.addTask());
+                this.taskInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.addTask();
+                });
+                this.clearCompletedBtn.addEventListener('click', () => this.clearCompleted());
+                this.filterBtns.forEach(btn => {
+                    btn.addEventListener('click', (e) => this.setFilter(e.target.closest('.filter-btn').dataset.filter));
+                });
+                document.addEventListener('keypress', (e) => {
+                    if (e.key === '/' && document.activeElement !== this.taskInput) {
+                        e.preventDefault();
+                        this.taskInput.focus();
+                    }
+                });
+            }
+
+            addTask() {
+                const text = this.taskInput.value.trim();
+                if (!text) return;
+
+                const task = {
+                    id: Date.now(),
+                    text: text,
+                    priority: this.prioritySelect.value,
+                    completed: false,
+                    createdAt: new Date().toISOString()
+                };
+
+                this.tasks.unshift(task);
+                this.taskInput.value = '';
+                this.saveTasks();
+                this.render();
+            }
+
+            toggleTask(id) {
+                const task = this.tasks.find(t => t.id === id);
+                if (task) {
+                    task.completed = !task.completed;
+                    this.saveTasks();
+                    this.render();
+                }
+            }
+
+            deleteTask(id) {
+                this.tasks = this.tasks.filter(t => t.id !== id);
+                this.saveTasks();
+                this.render();
+            }
+
+            clearCompleted() {
+                this.tasks = this.tasks.filter(t => !t.completed);
+                this.saveTasks();
+                this.render();
+            }
+
+            setFilter(filter) {
+                this.currentFilter = filter;
+                this.filterBtns.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.filter === filter);
+                });
+                this.render();
+            }
+
+            getFilteredTasks() {
+                switch(this.currentFilter) {
+                    case 'active':
+                        return this.tasks.filter(t => !t.completed);
+                    case 'completed':
+                        return this.tasks.filter(t => t.completed);
+                    case 'high':
+                    case 'medium':
+                    case 'low':
+                        return this.tasks.filter(t => t.priority === this.currentFilter);
+                    default:
+                        return this.tasks;
+                }
+            }
+
+            render() {
+                const filteredTasks = this.getFilteredTasks();
+                const activeTasks = this.tasks.filter(t => !t.completed);
+                const completedTasks = this.tasks.filter(t => t.completed);
+
+                // Update stats
+                document.getElementById('totalCount').textContent = this.tasks.length;
+                document.getElementById('activeCount').textContent = activeTasks.length;
+                document.getElementById('statActiveCount').textContent = activeTasks.length;
+                document.getElementById('statCompletedCount').textContent = completedTasks.length;
+                document.getElementById('completedBadge').textContent = completedTasks.length;
+
+                // Priority counts
+                document.getElementById('highCount').textContent = this.tasks.filter(t => t.priority === 'high' && !t.completed).length;
+                document.getElementById('mediumCount').textContent = this.tasks.filter(t => t.priority === 'medium' && !t.completed).length;
+                document.getElementById('lowCount').textContent = this.tasks.filter(t => t.priority === 'low' && !t.completed).length;
+
+                // Show/hide elements
+                if (filteredTasks.length === 0) {
+                    this.taskList.style.display = 'none';
+                    this.emptyState.classList.remove('hidden');
+                    this.taskFooter.classList.add('hidden');
+                } else {
+                    this.taskList.style.display = 'block';
+                    this.emptyState.classList.add('hidden');
+                    this.taskFooter.classList.remove('hidden');
+                }
+
+                // Render tasks
+                this.taskList.innerHTML = filteredTasks.map(task => `
+                    <div class="flex items-center gap-4 py-4 border-b border-[#e0e0e0] hover:bg-[#f9f9f9] transition-colors px-2 -mx-2 rounded ${task.completed ? 'opacity-60' : ''}">
+                        <input
+                            type="checkbox"
+                            class="task-checkbox"
+                            ${task.completed ? 'checked' : ''}
+                            onchange="app.toggleTask(${task.id})"
+                        >
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm text-[#383838] ${task.completed ? 'line-through text-[#999]' : ''} break-words">${this.escapeHtml(task.text)}</p>
+                        </div>
+                        <span class="priority-badge priority-${task.priority} flex-shrink-0 font-mono">${task.priority}</span>
+                        <button
+                            onclick="app.deleteTask(${task.id})"
+                            class="px-4 py-2 border-2 border-[#383838] rounded bg-white hover:bg-[#ff6b6b] hover:text-white hover:border-[#ff6b6b] transition-colors font-mono text-[11px] font-semibold tracking-[0.44px] uppercase text-[#383838] flex-shrink-0"
+                        >
+                            Delete
+                        </button>
+                    </div>
+                `).join('');
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            saveTasks() {
+                localStorage.setItem('taskflow-tasks', JSON.stringify(this.tasks));
+            }
+
+            loadTasks() {
+                const stored = localStorage.getItem('taskflow-tasks');
+                return stored ? JSON.parse(stored) : [];
+            }
+        }
+
+        const app = new TaskFlowApp();
+    </script>
+</body>
+</html>
