@@ -23,23 +23,87 @@
         .font-mono {
             font-family: 'Aeonik Mono', 'Courier New', monospace !important;
         }
+        @keyframes pulse-border {
+            0%, 100% {
+                border-color: #6fc2ff;
+                box-shadow: 0 0 0 0 rgba(111, 194, 255, 0.4);
+            }
+            50% {
+                border-color: #4a9fd4;
+                box-shadow: 0 0 0 4px rgba(111, 194, 255, 0.2);
+            }
+        }
+        .demo-pulse {
+            animation: pulse-border 1.5s ease-in-out infinite;
+        }
+        .typing-cursor::after {
+            content: '|';
+            animation: blink 1s infinite;
+            margin-left: 2px;
+        }
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .slide-in-up {
+            animation: slideInUp 0.4s ease-out forwards;
+        }
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        .scale-in {
+            animation: scaleIn 0.3s ease-out forwards;
+        }
+        .demo-btn-active {
+            background: linear-gradient(135deg, #4db5a5 0%, #3a9587 100%);
+            color: white;
+        }
     </style>
 </head>
 <body class="bg-[#f5f3ed] min-h-screen p-5 md:p-10 overflow-x-hidden">
 
+    <!-- Demo Control Button -->
+    <div class="fixed top-5 right-5 z-50">
+        <button
+            id="demoToggleBtn"
+            class="px-6 py-3 bg-white border-2 border-[#383838] rounded-lg font-mono text-xs font-semibold tracking-[0.52px] uppercase text-[#383838] flex items-center gap-2 transition-all hover:bg-[#f5f3ed]"
+            style="box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.1);"
+        >
+            <i data-lucide="play" class="w-4 h-4" style="stroke-width: 1;"></i>
+            <span id="demoToggleText">Start Demo</span>
+        </button>
+    </div>
+
     <!-- Decorative Elements -->
-    <div class="fixed top-20 left-10 w-16 h-12 border-2 border-[#383838] rounded-[50px] hidden md:block" style="z-index: 0;">
+    <div id="cloudDeco" class="fixed top-20 left-10 w-16 h-12 border-2 border-[#383838] rounded-[50px] hidden md:block transition-all" style="z-index: 0;">
         <div class="absolute w-8 h-8 border-2 border-[#383838] rounded-full -top-4 left-1"></div>
     </div>
-    <div class="fixed top-16 right-24 w-6 h-6 border-2 border-[#383838] transform rotate-45 hidden md:block" style="z-index: 0;"></div>
-    <div class="fixed bottom-24 right-16 w-11 h-14 bg-gradient-to-br from-[#4db5a5] to-[#3a9587] rounded-lg border-2 border-[#383838] hidden md:block" style="z-index: 0; transform: perspective(200px) rotateY(-15deg);"></div>
-    <div class="fixed bottom-28 left-20 w-4 h-4 border-2 border-[#383838] transform rotate-45 hidden md:block" style="z-index: 0;"></div>
+    <div id="diamondDeco" class="fixed top-16 right-24 w-6 h-6 border-2 border-[#383838] transform rotate-45 hidden md:block transition-all" style="z-index: 0;"></div>
+    <div id="cylinderDeco" class="fixed bottom-24 right-16 w-11 h-14 bg-gradient-to-br from-[#4db5a5] to-[#3a9587] rounded-lg border-2 border-[#383838] hidden md:block transition-all" style="z-index: 0; transform: perspective(200px) rotateY(-15deg);"></div>
+    <div id="diamondSmallDeco" class="fixed bottom-28 left-20 w-4 h-4 border-2 border-[#383838] transform rotate-45 hidden md:block transition-all" style="z-index: 0;"></div>
 
     <!-- Main Container -->
     <div class="max-w-5xl mx-auto relative" style="z-index: 1;">
 
         <!-- Header -->
-        <div class="text-center mb-10">
+        <div id="header" class="text-center mb-10">
             <h1 class="font-mono text-4xl md:text-5xl font-normal tracking-[0.96px] text-[#383838] uppercase mb-3">TaskFlow</h1>
             <p class="font-mono text-sm font-normal tracking-[0.28px] text-[#555] uppercase">Organize Your Day, Amplify Your Impact</p>
         </div>
@@ -51,7 +115,7 @@
             <div class="lg:col-span-2 space-y-6">
 
                 <!-- Add Task Card -->
-                <div class="bg-white border-2 border-[#383838] rounded-lg p-6 md:p-8" style="box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.1);">
+                <div id="addTaskCard" class="bg-white border-2 border-[#383838] rounded-lg p-6 md:p-8" style="box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.1);">
                     <h2 class="font-mono text-sm font-semibold tracking-[0.48px] text-[#383838] uppercase mb-4 flex items-center gap-2">
                         <i data-lucide="plus-circle" class="w-4 h-4" style="stroke-width: 1;"></i>
                         Add New Task
@@ -61,17 +125,17 @@
                             type="text"
                             id="taskInput"
                             placeholder="What needs to be done?"
-                            class="w-full px-5 py-4 border-2 border-[#383838] rounded focus:outline-none focus:border-[#6fc2ff] text-sm text-[#383838] bg-white"
+                            class="w-full px-5 py-4 border-2 border-[#383838] rounded focus:outline-none focus:border-[#6fc2ff] text-sm text-[#383838] bg-white transition-all"
                         >
                         <div class="flex flex-col sm:flex-row gap-3">
-                            <select id="prioritySelect" class="flex-1 px-4 py-3 border-2 border-[#383838] rounded text-sm text-[#383838] bg-white focus:outline-none focus:border-[#6fc2ff] font-mono uppercase text-xs font-semibold tracking-[0.48px]">
+                            <select id="prioritySelect" class="flex-1 px-4 py-3 border-2 border-[#383838] rounded text-sm text-[#383838] bg-white focus:outline-none focus:border-[#6fc2ff] font-mono uppercase text-xs font-semibold tracking-[0.48px] transition-all">
                                 <option value="low">Low Priority</option>
                                 <option value="medium" selected>Medium Priority</option>
                                 <option value="high">High Priority</option>
                             </select>
                             <button
                                 id="addTaskBtn"
-                                class="px-8 py-3 bg-[#6fc2ff] border-2 border-[#383838] rounded hover:bg-[#4a9fd4] transition-colors font-mono text-xs font-semibold tracking-[0.52px] uppercase text-[#383838] flex items-center justify-center gap-2"
+                                class="px-8 py-3 bg-[#6fc2ff] border-2 border-[#383838] rounded hover:bg-[#4a9fd4] transition-all font-mono text-xs font-semibold tracking-[0.52px] uppercase text-[#383838] flex items-center justify-center gap-2"
                             >
                                 <i data-lucide="plus" class="w-4 h-4" style="stroke-width: 1;"></i>
                                 Add Task
@@ -81,7 +145,7 @@
                 </div>
 
                 <!-- Task List Card -->
-                <div class="bg-white border-2 border-[#383838] rounded-lg p-6 md:p-8" style="box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.1);">
+                <div id="taskListCard" class="bg-white border-2 border-[#383838] rounded-lg p-6 md:p-8" style="box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.1);">
 
                     <!-- Filters -->
                     <div class="flex flex-wrap gap-3 mb-6 pb-6 border-b-2 border-[#e0e0e0]">
@@ -123,7 +187,7 @@
                             <span id="activeCount">0</span> active
                             <span class="inline-flex items-center justify-center min-w-[24px] h-6 px-2 bg-[#4db5a5] border-2 border-[#383838] rounded-full font-mono text-xs font-bold text-white ml-2" id="completedBadge">0</span>
                         </div>
-                        <button id="clearCompletedBtn" class="px-6 py-2.5 border-2 border-[#383838] rounded bg-white hover:bg-[#383838] hover:text-white transition-colors font-mono text-xs font-semibold tracking-[0.44px] uppercase text-[#383838]">
+                        <button id="clearCompletedBtn" class="px-6 py-2.5 border-2 border-[#383838] rounded bg-white hover:bg-[#383838] hover:text-white transition-all font-mono text-xs font-semibold tracking-[0.44px] uppercase text-[#383838]">
                             Clear Completed
                         </button>
                     </div>
@@ -135,7 +199,7 @@
             <div class="space-y-6">
 
                 <!-- Quick Stats -->
-                <div class="bg-white border-2 border-[#383838] rounded-lg p-6" style="box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.1);">
+                <div id="statsCard" class="bg-white border-2 border-[#383838] rounded-lg p-6" style="box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.1);">
                     <h3 class="font-mono text-sm font-semibold tracking-[0.48px] text-[#383838] uppercase mb-4 flex items-center gap-2">
                         <i data-lucide="bar-chart-3" class="w-4 h-4" style="stroke-width: 1;"></i>
                         Statistics
@@ -143,21 +207,21 @@
                     <div class="space-y-4">
                         <div class="flex justify-between items-center py-3 border-b border-[#e0e0e0]">
                             <span class="font-mono text-xs tracking-[0.44px] uppercase text-[#555]">Total Tasks</span>
-                            <span class="font-mono text-lg font-semibold text-[#383838]" id="totalCount">0</span>
+                            <span class="font-mono text-lg font-semibold text-[#383838] transition-all" id="totalCount">0</span>
                         </div>
                         <div class="flex justify-between items-center py-3 border-b border-[#e0e0e0]">
                             <span class="font-mono text-xs tracking-[0.44px] uppercase text-[#555]">Active</span>
-                            <span class="font-mono text-lg font-semibold text-[#6fc2ff]" id="statActiveCount">0</span>
+                            <span class="font-mono text-lg font-semibold text-[#6fc2ff] transition-all" id="statActiveCount">0</span>
                         </div>
                         <div class="flex justify-between items-center py-3">
                             <span class="font-mono text-xs tracking-[0.44px] uppercase text-[#555]">Completed</span>
-                            <span class="font-mono text-lg font-semibold text-[#4db5a5]" id="statCompletedCount">0</span>
+                            <span class="font-mono text-lg font-semibold text-[#4db5a5] transition-all" id="statCompletedCount">0</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Priority Breakdown -->
-                <div class="bg-white border-2 border-[#383838] rounded-lg p-6" style="box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.1);">
+                <div id="priorityCard" class="bg-white border-2 border-[#383838] rounded-lg p-6" style="box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.1);">
                     <h3 class="font-mono text-sm font-semibold tracking-[0.48px] text-[#383838] uppercase mb-4 flex items-center gap-2">
                         <i data-lucide="flag" class="w-4 h-4" style="stroke-width: 1;"></i>
                         Priority
@@ -168,27 +232,27 @@
                                 <div class="w-3 h-3 bg-[#ff6b6b] border border-[#383838] rounded-full"></div>
                                 <span class="font-mono text-xs tracking-[0.44px] uppercase text-[#555]">High</span>
                             </div>
-                            <span class="font-mono text-sm font-semibold text-[#383838]" id="highCount">0</span>
+                            <span class="font-mono text-sm font-semibold text-[#383838] transition-all" id="highCount">0</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <div class="flex items-center gap-2">
                                 <div class="w-3 h-3 bg-[#ffd93d] border border-[#383838] rounded-full"></div>
                                 <span class="font-mono text-xs tracking-[0.44px] uppercase text-[#555]">Medium</span>
                             </div>
-                            <span class="font-mono text-sm font-semibold text-[#383838]" id="mediumCount">0</span>
+                            <span class="font-mono text-sm font-semibold text-[#383838] transition-all" id="mediumCount">0</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <div class="flex items-center gap-2">
                                 <div class="w-3 h-3 bg-[#6fc2ff] border border-[#383838] rounded-full"></div>
                                 <span class="font-mono text-xs tracking-[0.44px] uppercase text-[#555]">Low</span>
                             </div>
-                            <span class="font-mono text-sm font-semibold text-[#383838]" id="lowCount">0</span>
+                            <span class="font-mono text-sm font-semibold text-[#383838] transition-all" id="lowCount">0</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Keyboard Shortcuts -->
-                <div class="bg-white border-2 border-[#383838] rounded-lg p-6" style="box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.1);">
+                <div id="shortcutsCard" class="bg-white border-2 border-[#383838] rounded-lg p-6" style="box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.1);">
                     <h3 class="font-mono text-sm font-semibold tracking-[0.48px] text-[#383838] uppercase mb-4 flex items-center gap-2">
                         <i data-lucide="keyboard" class="w-4 h-4" style="stroke-width: 1;"></i>
                         Shortcuts
@@ -245,6 +309,7 @@
             appearance: none;
             position: relative;
             background: #ffffff;
+            transition: all 0.2s ease;
         }
         .task-checkbox:checked {
             background-color: #4db5a5;
@@ -278,12 +343,18 @@
     </style>
 
     <script>
-        lucide.createIcons({ strokeWidth: 1 });
+        // Wait for page to load
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons({ strokeWidth: 1 });
+        });
 
         class TaskFlowApp {
             constructor() {
                 this.tasks = this.loadTasks();
                 this.currentFilter = 'all';
+                this.demoMode = false;
+                this.demoTimeout = null;
+                this.demoTimeouts = [];
                 this.init();
             }
 
@@ -291,6 +362,7 @@
                 this.cacheDom();
                 this.bindEvents();
                 this.render();
+                setTimeout(() => this.initAnimations(), 100);
             }
 
             cacheDom() {
@@ -302,6 +374,8 @@
                 this.taskFooter = document.getElementById('taskFooter');
                 this.filterBtns = document.querySelectorAll('.filter-btn');
                 this.clearCompletedBtn = document.getElementById('clearCompletedBtn');
+                this.demoToggleBtn = document.getElementById('demoToggleBtn');
+                this.demoToggleText = document.getElementById('demoToggleText');
             }
 
             bindEvents() {
@@ -319,6 +393,197 @@
                         this.taskInput.focus();
                     }
                 });
+                this.demoToggleBtn.addEventListener('click', () => {
+                    console.log('Demo button clicked');
+                    this.toggleDemo();
+                });
+            }
+
+            initAnimations() {
+                // Animate cards on page load
+                const cards = ['#addTaskCard', '#taskListCard', '#statsCard', '#priorityCard', '#shortcutsCard'];
+                cards.forEach((selector, index) => {
+                    const card = document.querySelector(selector);
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(20px)';
+                    setTimeout(() => {
+                        card.style.transition = 'all 0.5s ease-out';
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, 100 * index);
+                });
+
+                // Animate decorations
+                const decos = ['#cloudDeco', '#diamondDeco', '#cylinderDeco', '#diamondSmallDeco'];
+                decos.forEach((selector, index) => {
+                    const deco = document.querySelector(selector);
+                    deco.style.opacity = '0';
+                    deco.style.transform = 'scale(0)';
+                    setTimeout(() => {
+                        deco.style.transition = 'all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+                        deco.style.opacity = '1';
+                        deco.style.transform = selector.includes('diamond') ? 'rotate(45deg) scale(1)' : 'scale(1)';
+                    }, 300 + (100 * index));
+                });
+            }
+
+            toggleDemo() {
+                console.log('Toggle demo, current mode:', this.demoMode);
+                if (this.demoMode) {
+                    this.stopDemo();
+                } else {
+                    this.startDemo();
+                }
+            }
+
+            startDemo() {
+                console.log('Starting demo');
+                this.demoMode = true;
+                this.demoToggleBtn.classList.add('demo-btn-active');
+                this.demoToggleText.textContent = 'Stop Demo';
+
+                // Update icon
+                const iconContainer = this.demoToggleBtn.querySelector('i, svg');
+                if (iconContainer) {
+                    if (iconContainer.tagName === 'I') {
+                        iconContainer.setAttribute('data-lucide', 'square');
+                    } else {
+                        // Replace SVG with new icon
+                        const newIcon = document.createElement('i');
+                        newIcon.setAttribute('data-lucide', 'square');
+                        newIcon.className = 'w-4 h-4';
+                        newIcon.style.strokeWidth = '1';
+                        iconContainer.replaceWith(newIcon);
+                    }
+                    lucide.createIcons({ strokeWidth: 1 });
+                }
+
+                // Clear existing tasks for demo
+                this.tasks = [];
+                this.saveTasks();
+                this.render();
+
+                // Demo script
+                const demoTasks = [
+                    { text: 'Review product roadmap for Q1', priority: 'high', delay: 1000 },
+                    { text: 'Update team documentation', priority: 'medium', delay: 4000 },
+                    { text: 'Schedule 1-on-1 meetings', priority: 'high', delay: 4000 },
+                    { text: 'Review pull requests', priority: 'medium', delay: 4000 },
+                    { text: 'Plan team offsite event', priority: 'low', delay: 4000 }
+                ];
+
+                this.runDemoSequence(demoTasks, 0);
+            }
+
+            runDemoSequence(demoTasks, index) {
+                if (!this.demoMode || index >= demoTasks.length) {
+                    if (this.demoMode && index >= demoTasks.length) {
+                        // Demo completed, show task completion
+                        this.demoTimeouts.push(setTimeout(() => {
+                            if (this.tasks.length > 2) this.toggleTask(this.tasks[2].id);
+                        }, 2000));
+
+                        this.demoTimeouts.push(setTimeout(() => {
+                            if (this.tasks.length > 4) this.toggleTask(this.tasks[4].id);
+                        }, 4000));
+
+                        this.demoTimeouts.push(setTimeout(() => {
+                            this.stopDemo();
+                        }, 7000));
+                    }
+                    return;
+                }
+
+                const task = demoTasks[index];
+
+                this.demoTimeouts.push(setTimeout(() => {
+                    if (!this.demoMode) return;
+
+                    // Focus input with animation
+                    this.taskInput.classList.add('demo-pulse');
+
+                    this.demoTimeouts.push(setTimeout(() => {
+                        if (!this.demoMode) return;
+
+                        // Type the task
+                        this.typeText(task.text, 0, () => {
+                            if (!this.demoMode) return;
+
+                            this.demoTimeouts.push(setTimeout(() => {
+                                if (!this.demoMode) return;
+
+                                // Select priority
+                                this.prioritySelect.value = task.priority;
+                                this.prioritySelect.classList.add('demo-pulse');
+
+                                this.demoTimeouts.push(setTimeout(() => {
+                                    if (!this.demoMode) return;
+
+                                    this.prioritySelect.classList.remove('demo-pulse');
+                                    this.addTaskBtn.classList.add('scale-in');
+
+                                    this.demoTimeouts.push(setTimeout(() => {
+                                        if (!this.demoMode) return;
+
+                                        this.addTask();
+                                        this.taskInput.classList.remove('demo-pulse');
+                                        this.addTaskBtn.classList.remove('scale-in');
+
+                                        // Continue with next task
+                                        this.runDemoSequence(demoTasks, index + 1);
+                                    }, 300));
+                                }, 800));
+                            }, 500));
+                        });
+                    }, 500));
+                }, task.delay));
+            }
+
+            stopDemo() {
+                console.log('Stopping demo');
+                this.demoMode = false;
+                this.demoToggleBtn.classList.remove('demo-btn-active');
+                this.demoToggleText.textContent = 'Start Demo';
+
+                // Update icon
+                const iconContainer = this.demoToggleBtn.querySelector('i, svg');
+                if (iconContainer) {
+                    if (iconContainer.tagName === 'I') {
+                        iconContainer.setAttribute('data-lucide', 'play');
+                    } else {
+                        // Replace SVG with new icon
+                        const newIcon = document.createElement('i');
+                        newIcon.setAttribute('data-lucide', 'play');
+                        newIcon.className = 'w-4 h-4';
+                        newIcon.style.strokeWidth = '1';
+                        iconContainer.replaceWith(newIcon);
+                    }
+                    lucide.createIcons({ strokeWidth: 1 });
+                }
+
+                this.taskInput.classList.remove('demo-pulse');
+                this.prioritySelect.classList.remove('demo-pulse');
+
+                // Clear all timeouts
+                this.demoTimeouts.forEach(timeout => clearTimeout(timeout));
+                this.demoTimeouts = [];
+            }
+
+            typeText(text, index, callback) {
+                if (!this.demoMode || index >= text.length) {
+                    if (callback) callback();
+                    return;
+                }
+
+                if (index === 0) {
+                    this.taskInput.value = '';
+                }
+
+                this.taskInput.value += text[index];
+
+                this.demoTimeouts.push(setTimeout(() => {
+                    this.typeText(text, index + 1, callback);
+                }, 50 + Math.random() * 50));
             }
 
             addTask() {
@@ -337,6 +602,14 @@
                 this.taskInput.value = '';
                 this.saveTasks();
                 this.render();
+
+                // Animate the newly added task
+                setTimeout(() => {
+                    const firstTask = this.taskList.querySelector('div');
+                    if (firstTask) {
+                        firstTask.classList.add('slide-in-up');
+                    }
+                }, 10);
             }
 
             toggleTask(id) {
@@ -388,17 +661,17 @@
                 const activeTasks = this.tasks.filter(t => !t.completed);
                 const completedTasks = this.tasks.filter(t => t.completed);
 
-                // Update stats
-                document.getElementById('totalCount').textContent = this.tasks.length;
-                document.getElementById('activeCount').textContent = activeTasks.length;
-                document.getElementById('statActiveCount').textContent = activeTasks.length;
-                document.getElementById('statCompletedCount').textContent = completedTasks.length;
-                document.getElementById('completedBadge').textContent = completedTasks.length;
+                // Update stats with animation
+                this.animateNumber('totalCount', this.tasks.length);
+                this.animateNumber('activeCount', activeTasks.length);
+                this.animateNumber('statActiveCount', activeTasks.length);
+                this.animateNumber('statCompletedCount', completedTasks.length);
+                this.animateNumber('completedBadge', completedTasks.length);
 
                 // Priority counts
-                document.getElementById('highCount').textContent = this.tasks.filter(t => t.priority === 'high' && !t.completed).length;
-                document.getElementById('mediumCount').textContent = this.tasks.filter(t => t.priority === 'medium' && !t.completed).length;
-                document.getElementById('lowCount').textContent = this.tasks.filter(t => t.priority === 'low' && !t.completed).length;
+                this.animateNumber('highCount', this.tasks.filter(t => t.priority === 'high' && !t.completed).length);
+                this.animateNumber('mediumCount', this.tasks.filter(t => t.priority === 'medium' && !t.completed).length);
+                this.animateNumber('lowCount', this.tasks.filter(t => t.priority === 'low' && !t.completed).length);
 
                 // Show/hide elements
                 if (filteredTasks.length === 0) {
@@ -413,7 +686,7 @@
 
                 // Render tasks
                 this.taskList.innerHTML = filteredTasks.map(task => `
-                    <div class="flex items-center gap-4 py-4 border-b border-[#e0e0e0] hover:bg-[#f9f9f9] transition-colors px-2 -mx-2 rounded ${task.completed ? 'opacity-60' : ''}">
+                    <div class="flex items-center gap-4 py-4 border-b border-[#e0e0e0] hover:bg-[#f9f9f9] transition-all px-2 -mx-2 rounded ${task.completed ? 'opacity-60' : ''}">
                         <input
                             type="checkbox"
                             class="task-checkbox"
@@ -426,12 +699,30 @@
                         <span class="priority-badge priority-${task.priority} flex-shrink-0 font-mono">${task.priority}</span>
                         <button
                             onclick="app.deleteTask(${task.id})"
-                            class="px-4 py-2 border-2 border-[#383838] rounded bg-white hover:bg-[#ff6b6b] hover:text-white hover:border-[#ff6b6b] transition-colors font-mono text-[11px] font-semibold tracking-[0.44px] uppercase text-[#383838] flex-shrink-0"
+                            class="px-4 py-2 border-2 border-[#383838] rounded bg-white hover:bg-[#ff6b6b] hover:text-white hover:border-[#ff6b6b] transition-all font-mono text-[11px] font-semibold tracking-[0.44px] uppercase text-[#383838] flex-shrink-0"
                         >
                             Delete
                         </button>
                     </div>
                 `).join('');
+            }
+
+            animateNumber(elementId, targetValue) {
+                const element = document.getElementById(elementId);
+                const currentValue = parseInt(element.textContent) || 0;
+
+                if (currentValue === targetValue) return;
+
+                element.style.transform = 'scale(1.2)';
+                element.style.color = '#4db5a5';
+
+                setTimeout(() => {
+                    element.textContent = targetValue;
+                    element.style.transform = 'scale(1)';
+                    setTimeout(() => {
+                        element.style.color = '';
+                    }, 300);
+                }, 150);
             }
 
             escapeHtml(text) {

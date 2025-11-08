@@ -19,15 +19,25 @@ Titles above 20px should use tracking-tight.
 Make it responsive.
 Avoid setting tailwind config or css classes, use tailwind directly in html tags.
 If there are charts, use Chart.
-s for charts (avoid bug: if your canvas is on the same level as other nodes: h2 p canvas div = infinite grows.
+For charts (avoid bug: if your canvas is on the same level as other nodes: h2 p canvas div = infinite grows.
 h2 p div>canvas div = as intended.
+
 Add subtle dividers and outlines where appropriate.
+
 Don't put tailwind classes in the html tag, put them in the body tags.
+
 Be creative with fonts, layouts, be extremely detailed and make it functional.
+
 If design, code or html is provided, IMPORTANT: respect the original design, for colors, style as much as possible.
+
 Don't use javascript for animations, use tailwind instead.
+
 Add hover color and interactions.
+
 For tech, cool, futuristic, favor dark mode unless specified otherwise.
+
 For modern, traditional, professional, business, favor light mode unless specified otherwise.
+
 Use subtle contrast.
+
 For logos, use letters only with tight tracking.
